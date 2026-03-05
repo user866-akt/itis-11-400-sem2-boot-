@@ -1,0 +1,1 @@
+rootProject.name = "itis-11-400-sem2"
