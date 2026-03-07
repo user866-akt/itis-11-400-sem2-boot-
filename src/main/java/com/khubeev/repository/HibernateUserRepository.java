@@ -4,17 +4,15 @@ import com.khubeev.model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Repository
-@Transactional(readOnly = true)
-public class UserRepository {
+public class HibernateUserRepository {
 
     private final SessionFactory sessionFactory;
 
-    public UserRepository(SessionFactory sessionFactory) {
+    public HibernateUserRepository(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 

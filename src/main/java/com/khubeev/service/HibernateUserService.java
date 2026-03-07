@@ -2,7 +2,7 @@ package com.khubeev.service;
 
 import com.khubeev.dto.UserDto;
 import com.khubeev.model.User;
-import com.khubeev.repository.UserRepository;
+import com.khubeev.repository.HibernateUserRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -10,25 +10,27 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional()
-public class UserService {
+@Transactional("hibernateTransactionManager")
+public class HibernateUserService {
 
-    private final UserRepository userRepository;
+    private final HibernateUserRepository hibernateUserRepository;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public HibernateUserService(HibernateUserRepository hibernateUserRepository) {
+        this.hibernateUserRepository = hibernateUserRepository;
     }
 
     private UserDto convertToDto(User user) {
         return new UserDto(user.getId(), user.getUsername());
     }
 
+    @Transactional("hibernateTransactionManager")
     public List<UserDto> findAll() {
-        return userRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
+        return hibernateUserRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
+    @Transactional("hibernateTransactionManager")
     public UserDto findById(Long id) {
-        User user = userRepository.findById(id);
+        User user = hibernateUserRepository.findById(id);
         if (user != null) {
             return convertToDto(user);
         } else {
@@ -36,30 +38,30 @@ public class UserService {
         }
     }
 
-    @Transactional
+    @Transactional("hibernateTransactionManager")
     public UserDto createUser(String username) {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("Username can't be empty!");
         }
         User user = new User();
         user.setUsername(username);
-        User savedUser = userRepository.save(user);
+        User savedUser = hibernateUserRepository.save(user);
         return convertToDto(savedUser);
     }
 
-    @Transactional
+    @Transactional("hibernateTransactionManager")
     public UserDto updateUser(Long id, String username) {
-        User user = userRepository.findById(id);
+        User user = hibernateUserRepository.findById(id);
         if (user == null) {
             throw new RuntimeException("User not found with id: " + id);
         }
         user.setUsername(username);
-        User updatedUser = userRepository.update(user);
+        User updatedUser = hibernateUserRepository.update(user);
         return convertToDto(updatedUser);
     }
 
-    @Transactional
+    @Transactional("hibernateTransactionManager")
     public void deleteUser(Long id) {
-        userRepository.delete(id);
+        hibernateUserRepository.delete(id);
     }
 }

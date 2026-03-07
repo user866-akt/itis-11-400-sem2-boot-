@@ -3,43 +3,45 @@ package com.khubeev.controller;
 import com.khubeev.dto.CreateUserRequest;
 import com.khubeev.dto.UpdateUserRequest;
 import com.khubeev.dto.UserDto;
-import com.khubeev.service.HibernateUserService;
+import com.khubeev.service.JpaUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
-public class UserController {
+@RequestMapping("/jpa/users")
+public class JpaUserController {
 
-    private final HibernateUserService hibernateUserService;
+    private final JpaUserService jpaUserService;
 
-    public UserController(HibernateUserService hibernateUserService) {
-        this.hibernateUserService = hibernateUserService;
+    public JpaUserController(JpaUserService jpaUserService) {
+        this.jpaUserService = jpaUserService;
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<UserDto>> findAll() {
-        List<UserDto> users = hibernateUserService.findAll();
+        List<UserDto> users = jpaUserService.findAll();
         return ResponseEntity.ok(users);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDto> findById(@PathVariable("id") Long id) {
-        UserDto user = hibernateUserService.findById(id);
-        if (user == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(user);
+        UserDto user = jpaUserService.findById(id);
+        return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<UserDto> findByUsername(@RequestParam String username) {
+        UserDto user = jpaUserService.findByUsername(username);
+        return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDto> createUser(@RequestBody CreateUserRequest request) {
         try {
-            UserDto createdUser = hibernateUserService.createUser(request.getUsername());
+            UserDto createdUser = jpaUserService.createUser(request.getUsername());
             return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -49,16 +51,16 @@ public class UserController {
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDto> updateUser(@PathVariable("id") Long id, @RequestBody UpdateUserRequest request) {
         try {
-            UserDto updatedUser = hibernateUserService.updateUser(id, request.getUsername());
+            UserDto updatedUser = jpaUserService.updateUser(id, request.getUsername());
             return ResponseEntity.ok(updatedUser);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
-    @DeleteMapping(value = "/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) {
-        hibernateUserService.deleteUser(id);
+        jpaUserService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 }
