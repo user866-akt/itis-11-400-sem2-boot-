@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional("hibernateTransactionManager")
+@Transactional
 public class HibernateUserService {
 
     private final HibernateUserRepository hibernateUserRepository;
@@ -23,12 +23,12 @@ public class HibernateUserService {
         return new UserDto(user.getId(), user.getUsername());
     }
 
-    @Transactional("hibernateTransactionManager")
+    @Transactional
     public List<UserDto> findAll() {
         return hibernateUserRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
-    @Transactional("hibernateTransactionManager")
+    @Transactional
     public UserDto findById(Long id) {
         User user = hibernateUserRepository.findById(id);
         if (user != null) {
@@ -38,7 +38,7 @@ public class HibernateUserService {
         }
     }
 
-    @Transactional("hibernateTransactionManager")
+    @Transactional
     public UserDto createUser(String username) {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("Username can't be empty!");
@@ -49,7 +49,7 @@ public class HibernateUserService {
         return convertToDto(savedUser);
     }
 
-    @Transactional("hibernateTransactionManager")
+    @Transactional
     public UserDto updateUser(Long id, String username) {
         User user = hibernateUserRepository.findById(id);
         if (user == null) {
@@ -60,7 +60,7 @@ public class HibernateUserService {
         return convertToDto(updatedUser);
     }
 
-    @Transactional("hibernateTransactionManager")
+    @Transactional
     public void deleteUser(Long id) {
         hibernateUserRepository.delete(id);
     }

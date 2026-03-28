@@ -5,6 +5,7 @@ import com.khubeev.service.JpaUserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -18,10 +19,14 @@ public class FormController {
     }
 
     @PostMapping("/register")
-    public String registerForm(CreateUserRequest request, RedirectAttributes redirectAttributes) {
+    public String registerForm(@RequestParam("username") String username,
+                               @RequestParam("password") String password,
+                               @RequestParam("email") String email,
+                               RedirectAttributes redirectAttributes) {
         try {
-            jpaUserService.createUser(request.getUsername(), request.getPassword());
-            return "redirect:/login?registered";
+            jpaUserService.createUser(username, password, email);
+            redirectAttributes.addFlashAttribute("success", "Registration successful! Please check your email to verify your account.");
+            return "redirect:/login";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/register";

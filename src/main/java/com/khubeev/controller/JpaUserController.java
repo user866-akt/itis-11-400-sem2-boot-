@@ -45,7 +45,8 @@ public class JpaUserController {
         try {
             UserDto createdUser = jpaUserService.createUser(
                     request.getUsername(),
-                    request.getPassword()
+                    request.getPassword(),
+                    request.getEmail()
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
         } catch (IllegalArgumentException e) {
@@ -74,7 +75,8 @@ public class JpaUserController {
         try {
             UserDto createdUser = jpaUserService.createUser(
                     request.getUsername(),
-                    request.getPassword()
+                    request.getPassword(),
+                    request.getEmail()
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
         } catch (IllegalArgumentException e) {

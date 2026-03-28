@@ -18,6 +18,15 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column
+    private String verificationCode;
+
+    @Column(nullable = false)
+    private boolean enabled = false;
+
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "user_role",
@@ -39,4 +48,10 @@ public class User {
     public void setRoles(List<Role> roles) { this.roles = roles; }
     public List<Note> getNotes() { return notes; }
     public void setNotes(List<Note> notes) { this.notes = notes; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getVerificationCode() { return verificationCode; }
+    public void setVerificationCode(String verificationCode) { this.verificationCode = verificationCode; }
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
 }

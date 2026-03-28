@@ -1,46 +1,43 @@
 package com.khubeev.repository;
 
 import com.khubeev.model.User;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Repository
+@Transactional
 public class HibernateUserRepository {
 
-    private final SessionFactory sessionFactory;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    public HibernateUserRepository(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
-
-    private Session getCurrentSession() {
-        return sessionFactory.getCurrentSession();
-    }
-
+    @Transactional(readOnly = true)
     public List<User> findAll() {
-        return getCurrentSession().createQuery("from User", User.class).list();
+        return entityManager.createQuery("from User", User.class).getResultList();
     }
 
+    @Transactional(readOnly = true)
     public User findById(Long id) {
-        return getCurrentSession().get(User.class, id);
+        return entityManager.find(User.class, id);
     }
 
     public User save(User user) {
-        getCurrentSession().persist(user);
+        entityManager.persist(user);
         return user;
     }
 
     public User update(User user) {
-        return getCurrentSession().merge(user);
+        return entityManager.merge(user);
     }
 
     public void delete(Long id) {
         User user = findById(id);
         if (user != null) {
-            getCurrentSession().remove(user);
+            entityManager.remove(user);
         }
     }
 }

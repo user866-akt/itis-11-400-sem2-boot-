@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
+    <title>Registration</title>
     <meta charset="UTF-8">
     <style>
         body {
@@ -18,7 +18,8 @@
             margin-bottom: 5px;
         }
         input[type="text"],
-        input[type="password"] {
+        input[type="password"],
+        input[type="email"] {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
@@ -36,41 +37,39 @@
             color: red;
             margin-bottom: 15px;
         }
-        .success {
-            color: green;
-            margin-bottom: 15px;
-        }
-        .register-link {
+        .login-link {
             margin-top: 15px;
         }
     </style>
 </head>
 <body>
-<h2>Login</h2>
+<h2>Register</h2>
 
-<#if RequestParameters.error??>
-    <div class="error">Invalid username or password</div>
+<#if error??>
+    <div class="error">${error}</div>
 </#if>
 
-<#if RequestParameters.registered??>
-    <div class="success">Registration successful! Please login.</div>
-</#if>
-
-<form action="/login" method="post">
+<form action="/forms/register" method="post">
     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
     <div class="form-group">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required>
     </div>
     <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+    <div class="form-group">
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
     </div>
-    <button type="submit">Login</button>
+    <div>
+        <button type="submit">Register</button>
+    </div>
 </form>
 
-<div class="register-link">
-    <p>Don't have an account? <a href="/register">Register here</a></p>
+<div class="login-link">
+    <p>Already have an account? <a href="/login">Login here</a></p>
 </div>
 </body>
 </html>

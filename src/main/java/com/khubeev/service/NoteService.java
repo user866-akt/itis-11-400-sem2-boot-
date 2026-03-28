@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(value = "jpaTransactionManager")
+@Transactional
 public class NoteService {
 
     private final NoteRepository noteRepository;
@@ -41,7 +41,7 @@ public class NoteService {
         }
     }
 
-    @Transactional(value = "jpaTransactionManager", readOnly = true)
+    @Transactional(readOnly = true)
     public List<NoteDto> findAllByUser(User user) {
         if (user == null) {
             return List.of();
@@ -52,7 +52,7 @@ public class NoteService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(value = "jpaTransactionManager", readOnly = true)
+    @Transactional(readOnly = true)
     public List<NoteDto> findAllPublicNotes() {
         return noteRepository.findAllPublicNotesOrderByCreatedAtDesc()
                 .stream()
@@ -60,7 +60,7 @@ public class NoteService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(value = "jpaTransactionManager", readOnly = true)
+    @Transactional(readOnly = true)
     public List<NoteDto> findAllNotesForAdmin() {
         List<Note> allNotes = noteRepository.findAll();
         return allNotes.stream()
@@ -68,7 +68,7 @@ public class NoteService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(value = "jpaTransactionManager")
+    @Transactional
     public NoteDto createNote(User user, String title, String content, boolean isPublic) {
         if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("Title cannot be empty");
@@ -85,7 +85,7 @@ public class NoteService {
         return convertToDto(savedNote);
     }
 
-    @Transactional(value = "jpaTransactionManager")
+    @Transactional
     public NoteDto updateNote(Long noteId, User user, String title, String content, boolean isPublic) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new RuntimeException("Note not found with id: " + noteId));
@@ -104,7 +104,7 @@ public class NoteService {
         return convertToDto(updatedNote);
     }
 
-    @Transactional(value = "jpaTransactionManager")
+    @Transactional
     public void deleteNote(Long noteId, User user) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new RuntimeException("Note not found with id: " + noteId));
@@ -113,7 +113,7 @@ public class NoteService {
         noteRepository.delete(note);
     }
 
-    @Transactional(value = "jpaTransactionManager")
+    @Transactional
     public NoteDto deleteNoteByAdmin(Long noteId) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new RuntimeException("Note not found with id: " + noteId));
@@ -122,7 +122,7 @@ public class NoteService {
         return convertToDto(note);
     }
 
-    @Transactional(value = "jpaTransactionManager", readOnly = true)
+    @Transactional(readOnly = true)
     public NoteDto findNoteByIdForEdit(Long noteId, User user) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new RuntimeException("Note not found with id: " + noteId));

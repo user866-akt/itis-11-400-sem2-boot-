@@ -1,16 +1,15 @@
 package com.khubeev.config;
 
+import com.khubeev.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,9 +21,9 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
 
-    public SecurityConfig(UserDetailsService userDetailsService) {
+    public SecurityConfig(CustomUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
@@ -62,7 +61,7 @@ public class SecurityConfig {
                         .requestMatchers("/notes/public").permitAll()
                         .requestMatchers("/notes/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/register", "/forms/register", "/login").permitAll()
+                        .requestMatchers("/register", "/forms/register", "/login", "/verification").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -75,9 +74,9 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/")
                         .permitAll()
                 )
-                .httpBasic(Customizer.withDefaults())
+                .httpBasic(httpBasic -> {})
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/forms/register", "/admin/**")
+                        .ignoringRequestMatchers("/forms/register", "/admin/**", "/jpa/users/**", "/users/**")
                 );
 
         http.authenticationProvider(authenticationProvider());

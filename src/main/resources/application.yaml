@@ -1,0 +1,53 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sem2
+    username: postgres
+    password: 7777
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database: POSTGRESQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        id:
+          new_generator_mappings: true
+
+  freemarker:
+    enabled: true
+    template-loader-path: classpath:/templates/
+    suffix: .ftl
+    settings:
+      datetime_format: yyyy-MM-dd HH:mm:ss
+      date_format: yyyy-MM-dd
+      time_format: HH:mm:ss
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+  mail:
+    host: smtp.gmail.com
+    username: "hubeevamir@gmail.com"
+    password: "***"
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+mail:
+  base-url: http://localhost:8080
+  sender: Notes App
+  from: ${spring.mail.username}
+  subject: Please verify your Notes App account
+  content: "Dear $name,<br/><br/>Please click the link below to verify your account:<br/><br/><a href='$url'>VERIFY ACCOUNT</a><br/><br/>If you didn't create an account, please ignore this email.<br/><br/>Best regards,<br/>Notes App Team"
