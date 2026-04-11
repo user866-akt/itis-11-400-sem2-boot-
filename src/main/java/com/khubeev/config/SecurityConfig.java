@@ -61,7 +61,7 @@ public class SecurityConfig {
                         .requestMatchers("/notes/public").permitAll()
                         .requestMatchers("/notes/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/register", "/forms/register", "/login", "/verification").permitAll()
+                        .requestMatchers("/", "/index", "/register", "/login", "/verification", "/notes/public").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
