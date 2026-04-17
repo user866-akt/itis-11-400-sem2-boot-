@@ -6,11 +6,12 @@ import com.khubeev.model.User;
 import com.khubeev.service.NoteService;
 import com.khubeev.utils.WithCustomUser;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -59,7 +60,7 @@ class NoteControllerTest {
     }
 
     @Test
-    @Disabled
+    @WithMockUser
     void publicNotes_ShouldReturnPublicNotesView() throws Exception {
         when(noteService.findAllPublicNotes()).thenReturn(List.of(testNoteDto));
 
@@ -146,5 +147,56 @@ class NoteControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/notes"))
                 .andExpect(flash().attributeExists("success"));
+    }
+
+    @Test
+    @WithCustomUser(username = "testuser", role = "USER")
+    void showEditForm_WhenNoteNotFound_ShouldRedirectWithError() throws Exception {
+        when(noteService.findNoteByIdForEdit(eq(99L), any(User.class)))
+                .thenThrow(new RuntimeException("Note not found"));
+
+        mockMvc.perform(get("/notes/99/edit"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/notes"))
+                .andExpect(flash().attributeExists("error"));
+    }
+
+    @Test
+    @WithCustomUser(username = "testuser", role = "USER")
+    void showEditForm_WhenAccessDenied_ShouldRedirectWithError() throws Exception {
+        when(noteService.findNoteByIdForEdit(eq(1L), any(User.class)))
+                .thenThrow(new AccessDeniedException("Access denied"));
+
+        mockMvc.perform(get("/notes/1/edit"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/notes"))
+                .andExpect(flash().attributeExists("error"));
+    }
+
+    @Test
+    @WithCustomUser(username = "testuser", role = "USER")
+    void updateNote_WhenNoteNotFound_ShouldRedirectWithError() throws Exception {
+        when(noteService.updateNote(eq(99L), any(User.class), any(), any(), anyBoolean()))
+                .thenThrow(new RuntimeException("Note not found"));
+
+        mockMvc.perform(post("/notes/99/edit")
+                        .with(csrf())
+                        .param("title", "Updated")
+                        .param("content", "Content"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/notes/99/edit"))
+                .andExpect(flash().attributeExists("error"));
+    }
+
+    @Test
+    @WithCustomUser(username = "testuser", role = "USER")
+    void deleteNote_WhenNoteNotFound_ShouldRedirectWithError() throws Exception {
+        doThrow(new RuntimeException("Note not found")).when(noteService).deleteNote(eq(99L), any(User.class));
+
+        mockMvc.perform(post("/notes/99/delete")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/notes"))
+                .andExpect(flash().attributeExists("error"));
     }
 }

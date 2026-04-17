@@ -191,4 +191,74 @@ class NoteServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(1L);
     }
+
+    @Test
+    void updateNote_WithNullTitle_ShouldKeepOldTitle() {
+        when(noteRepository.findById(1L)).thenReturn(Optional.of(testNote));
+        when(noteRepository.save(any(Note.class))).thenReturn(testNote);
+
+        NoteDto result = noteService.updateNote(1L, testUser, null, "New Content", true);
+
+        assertThat(result).isNotNull();
+        assertThat(testNote.getTitle()).isEqualTo("Test Title");
+        assertThat(testNote.getContent()).isEqualTo("New Content");
+    }
+
+    @Test
+    void updateNote_WithEmptyTitle_ShouldKeepOldTitle() {
+        when(noteRepository.findById(1L)).thenReturn(Optional.of(testNote));
+        when(noteRepository.save(any(Note.class))).thenReturn(testNote);
+
+        NoteDto result = noteService.updateNote(1L, testUser, "", "New Content", true);
+
+        assertThat(result).isNotNull();
+        assertThat(testNote.getTitle()).isEqualTo("Test Title");
+    }
+
+    @Test
+    void updateNote_WithWhitespaceTitle_ShouldKeepOldTitle() {
+        when(noteRepository.findById(1L)).thenReturn(Optional.of(testNote));
+        when(noteRepository.save(any(Note.class))).thenReturn(testNote);
+
+        NoteDto result = noteService.updateNote(1L, testUser, "   ", "New Content", true);
+
+        assertThat(result).isNotNull();
+        assertThat(testNote.getTitle()).isEqualTo("Test Title");
+    }
+
+    @Test
+    void deleteNote_WhenNoteNotFound_ShouldThrowException() {
+        when(noteRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> noteService.deleteNote(99L, testUser))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Note not found with id: 99");
+    }
+
+    @Test
+    void deleteNoteByAdmin_WhenNoteNotFound_ShouldThrowException() {
+        when(noteRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> noteService.deleteNoteByAdmin(99L))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Note not found with id: 99");
+    }
+
+    @Test
+    void findNoteByIdForEdit_WhenNoteNotFound_ShouldThrowException() {
+        when(noteRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> noteService.findNoteByIdForEdit(99L, testUser))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Note not found with id: 99");
+    }
+
+    @Test
+    void findNoteByIdForEdit_WhenUserIsNotOwner_ShouldThrowAccessDeniedException() {
+        when(noteRepository.findById(1L)).thenReturn(Optional.of(testNote));
+
+        assertThatThrownBy(() -> noteService.findNoteByIdForEdit(1L, otherUser))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("You don't have permission to modify this note");
+    }
 }

@@ -4,7 +4,6 @@ import com.khubeev.config.TestSecurityConfig;
 import com.khubeev.dto.NoteDto;
 import com.khubeev.service.NoteService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -78,10 +77,34 @@ class AdminViewControllerTest {
     }
 
     @Test
-    @Disabled
     @WithMockUser(roles = "USER")
     void adminEndpoints_WhenUserIsNotAdmin_ShouldReturnForbidden() throws Exception {
         mockMvc.perform(get("/admin/notes"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void getAllNotes_WhenNoNotes_ShouldReturnEmptyList() throws Exception {
+        when(noteService.findAllNotesForAdmin()).thenReturn(List.of());
+
+        mockMvc.perform(get("/admin/notes"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin_notes"))
+                .andExpect(model().attributeExists("notes"))
+                .andExpect(model().attribute("notes", List.of()));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deleteNote_WhenServiceThrowsRuntimeException_ShouldHandleGracefully() throws Exception {
+        doThrow(new RuntimeException("Database error")).when(noteService).deleteNoteByAdmin(1L);
+
+        mockMvc.perform(post("/admin/notes/1/delete")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/notes"))
+                .andExpect(flash().attributeExists("error"))
+                .andExpect(flash().attribute("error", "Database error"));
     }
 }

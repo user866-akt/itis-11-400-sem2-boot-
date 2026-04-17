@@ -193,4 +193,42 @@ class JpaUserServiceTest {
         verify(jpaUserRepository).deleteById(1L);
         verify(jpaUserRepository).flush();
     }
+
+    @Test
+    void createUser_WithExistingEmail_ShouldThrowException() {
+        when(jpaUserRepository.findByEmail("existing@example.com")).thenReturn(Optional.of(testUser));
+
+        assertThatThrownBy(() -> jpaUserService.createUser("newuser", "pass", "existing@example.com"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Email already registered!");
+    }
+
+    @Test
+    void createUser_WhenRoleNotFound_ShouldThrowException() {
+        when(jpaUserRepository.findByUsername(any())).thenReturn(Optional.empty());
+        when(jpaUserRepository.findByEmail(any())).thenReturn(Optional.empty());
+        when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> jpaUserService.createUser("newuser", "pass", "new@example.com"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Default role 'ROLE_USER' not found in database");
+    }
+
+    @Test
+    void findByUsername_WhenUserDoesNotExist_ShouldReturnNull() {
+        when(jpaUserRepository.findByUsername("unknown")).thenReturn(Optional.empty());
+
+        UserDto result = jpaUserService.findByUsername("unknown");
+
+        assertThat(result).isNull();
+    }
+
+    @Test
+    void updateUser_WhenUserNotFound_ShouldThrowException() {
+        when(jpaUserRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> jpaUserService.updateUser(99L, "newname"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("User not found with id: 99");
+    }
 }

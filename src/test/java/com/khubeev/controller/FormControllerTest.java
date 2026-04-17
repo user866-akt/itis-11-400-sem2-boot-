@@ -1,12 +1,13 @@
 package com.khubeev.controller;
 
 import com.khubeev.config.TestSecurityConfig;
+import com.khubeev.dto.UserDto;
 import com.khubeev.service.JpaUserService;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -27,10 +28,11 @@ class FormControllerTest {
     private JpaUserService jpaUserService;
 
     @Test
-    @Disabled
+    @WithMockUser
     void registerForm_ShouldCreateUserAndRedirect() throws Exception {
+        UserDto userDto = new UserDto(1L, "newuser");
         when(jpaUserService.createUser(eq("newuser"), eq("password123"), eq("email@test.com")))
-                .thenReturn(null);
+                .thenReturn(userDto);
 
         mockMvc.perform(post("/forms/register")
                         .with(csrf())
@@ -43,7 +45,7 @@ class FormControllerTest {
     }
 
     @Test
-    @Disabled
+    @WithMockUser
     void registerForm_WithInvalidData_ShouldRedirectBackWithError() throws Exception {
         doThrow(new IllegalArgumentException("Username already exists!"))
                 .when(jpaUserService).createUser(any(), any(), any());

@@ -172,4 +172,50 @@ class JpaUserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
     }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void findByUsername_WhenUserDoesNotExist_ShouldReturnNotFound() throws Exception {
+        when(jpaUserService.findByUsername("unknown")).thenReturn(null);
+
+        mockMvc.perform(get("/jpa/users/search")
+                        .param("username", "unknown")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void updateUser_WhenUserNotFound_ShouldReturnNotFound() throws Exception {
+        UpdateUserRequest request = new UpdateUserRequest();
+        request.setUsername("updateduser");
+
+        when(jpaUserService.updateUser(eq(99L), any()))
+                .thenThrow(new RuntimeException("User not found"));
+
+        mockMvc.perform(put("/jpa/users/99")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void register_WithInvalidData_ShouldReturnBadRequestWithError() throws Exception {
+        CreateUserRequest request = new CreateUserRequest();
+        request.setUsername("");
+        request.setPassword("");
+        request.setEmail("");
+
+        when(jpaUserService.createUser(any(), any(), any()))
+                .thenThrow(new IllegalArgumentException("Username can't be empty!"));
+
+        mockMvc.perform(post("/jpa/users/register")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Username can't be empty!"));
+    }
 }
