@@ -1,5 +1,7 @@
 package com.khubeev.service;
 
+import com.khubeev.aop.Benchmark;
+import com.khubeev.aop.Metric;
 import com.khubeev.dto.UserDto;
 import com.khubeev.model.Role;
 import com.khubeev.model.User;
@@ -36,6 +38,8 @@ public class JpaUserService {
         return new UserDto(user.getId(), user.getUsername());
     }
 
+    @Benchmark("JpaUserService.findAll")
+    @Metric("JpaUserService.findAll")
     @Transactional(readOnly = true)
     public List<UserDto> findAll() {
         return jpaUserRepository.findAll().stream()
@@ -43,6 +47,8 @@ public class JpaUserService {
                 .collect(Collectors.toList());
     }
 
+    @Benchmark("JpaUserService.findById")
+    @Metric("JpaUserService.findById")
     @Transactional(readOnly = true)
     public UserDto findById(Long id) {
         return jpaUserRepository.findById(id)
@@ -50,6 +56,8 @@ public class JpaUserService {
                 .orElse(null);
     }
 
+    @Benchmark("JpaUserService.findByUsername")
+    @Metric("JpaUserService.findByUsername")
     @Transactional(readOnly = true)
     public UserDto findByUsername(String username) {
         return jpaUserRepository.findByUsername(username)
@@ -57,6 +65,8 @@ public class JpaUserService {
                 .orElse(null);
     }
 
+    @Benchmark("JpaUserService.createUser")
+    @Metric("JpaUserService.createUser")
     @Transactional
     public UserDto createUser(String username, String rawPassword, String email) {
         if (username == null || username.trim().isEmpty()) {
@@ -93,6 +103,8 @@ public class JpaUserService {
         return convertToDto(savedUser);
     }
 
+    @Benchmark("JpaUserService.verifyUser")
+    @Metric("JpaUserService.verifyUser")
     @Transactional
     public void verifyUser(String verificationCode) {
         User user = jpaUserRepository.findByVerificationCode(verificationCode)
@@ -107,6 +119,8 @@ public class JpaUserService {
         jpaUserRepository.saveAndFlush(user);
     }
 
+    @Benchmark("JpaUserService.updateUser")
+    @Metric("JpaUserService.updateUser")
     @Transactional
     public UserDto updateUser(Long id, String username) {
         User user = jpaUserRepository.findById(id)
@@ -116,6 +130,8 @@ public class JpaUserService {
         return convertToDto(updatedUser);
     }
 
+    @Benchmark("JpaUserService.deleteUser")
+    @Metric("JpaUserService.deleteUser")
     @Transactional
     public void deleteUser(Long id) {
         jpaUserRepository.deleteById(id);

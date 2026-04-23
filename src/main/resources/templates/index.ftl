@@ -67,6 +67,9 @@
         <#if user.isAdmin()>
             <a href="/admin/notes" class="admin-btn">Admin Panel</a>
         </#if>
+        <a class="nav-link" href="/statistics">
+            <i class="bi bi-graph-up"></i> Statistics
+        </a>
         <a href="/logout" class="logout-btn">Logout</a>
     </div>
 <#else>

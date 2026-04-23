@@ -1,5 +1,7 @@
 package com.khubeev.service;
 
+import com.khubeev.aop.Benchmark;
+import com.khubeev.aop.Metric;
 import com.khubeev.dto.NoteDto;
 import com.khubeev.model.Note;
 import com.khubeev.model.User;
@@ -41,6 +43,8 @@ public class NoteService {
         }
     }
 
+    @Benchmark("NoteService.findAllByUser")
+    @Metric("NoteService.findAllByUser")
     @Transactional(readOnly = true)
     public List<NoteDto> findAllByUser(User user) {
         if (user == null) {
@@ -52,6 +56,8 @@ public class NoteService {
                 .collect(Collectors.toList());
     }
 
+    @Benchmark("NoteService.findAllPublicNotes")
+    @Metric("NoteService.findAllPublicNotes")
     @Transactional(readOnly = true)
     public List<NoteDto> findAllPublicNotes() {
         return noteRepository.findAllPublicNotesOrderByCreatedAtDesc()
@@ -60,6 +66,8 @@ public class NoteService {
                 .collect(Collectors.toList());
     }
 
+    @Benchmark("NoteService.findAllNotesForAdmin")
+    @Metric("NoteService.findAllNotesForAdmin")
     @Transactional(readOnly = true)
     public List<NoteDto> findAllNotesForAdmin() {
         List<Note> allNotes = noteRepository.findAll();
@@ -68,6 +76,8 @@ public class NoteService {
                 .collect(Collectors.toList());
     }
 
+    @Benchmark("NoteService.createNote")
+    @Metric("NoteService.createNote")
     @Transactional
     public NoteDto createNote(User user, String title, String content, boolean isPublic) {
         if (title == null || title.trim().isEmpty()) {
@@ -85,6 +95,8 @@ public class NoteService {
         return convertToDto(savedNote);
     }
 
+    @Benchmark("NoteService.updateNote")
+    @Metric("NoteService.updateNote")
     @Transactional
     public NoteDto updateNote(Long noteId, User user, String title, String content, boolean isPublic) {
         Note note = noteRepository.findById(noteId)
@@ -104,6 +116,8 @@ public class NoteService {
         return convertToDto(updatedNote);
     }
 
+    @Benchmark("NoteService.deleteNote")
+    @Metric("NoteService.deleteNote")
     @Transactional
     public void deleteNote(Long noteId, User user) {
         Note note = noteRepository.findById(noteId)
@@ -113,6 +127,8 @@ public class NoteService {
         noteRepository.delete(note);
     }
 
+    @Benchmark("NoteService.deleteNoteByAdmin")
+    @Metric("NoteService.deleteNoteByAdmin")
     @Transactional
     public NoteDto deleteNoteByAdmin(Long noteId) {
         Note note = noteRepository.findById(noteId)
@@ -122,6 +138,8 @@ public class NoteService {
         return convertToDto(note);
     }
 
+    @Benchmark("NoteService.findNoteByIdForEdit")
+    @Metric("NoteService.findNoteByIdForEdit")
     @Transactional(readOnly = true)
     public NoteDto findNoteByIdForEdit(Long noteId, User user) {
         Note note = noteRepository.findById(noteId)
